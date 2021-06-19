@@ -74,7 +74,7 @@ class PCCVideoDecoder {
     const std::string fileName    = path + type;
     const std::string binFileName = fileName + ".bin";
     // wandanying todo: process yuv here
-    const std::string yuvRecFileName1 = "/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test/seq23/r5/S23C2AIR05_F1_dec_GOF0_texture_rec_1280x1280_8bit_p420 copy.yuv"; 
+    //const std::string yuvRecFileName1 = "/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test/seq23/r5/S23C2AIR05_F1_dec_GOF0_texture_rec_1280x1280_8bit_p420 copy.yuv"; 
     size_t            width = 0, height = 0;
     PCCHevcParser     hevcParser;
     hevcParser.getVideoSize( bitstream.vector(), width, height );
@@ -113,8 +113,8 @@ class PCCVideoDecoder {
         std::cout<<"read:"<<yuvRecFileName<<endl;
         if ( !video.read( yuvRecFileName, width, height, frameCount, bitDepth == 8 ? 1 : 2 ) ) { return false; }
       } else {
-        std::cout<<"read420:"<<yuvRecFileName1<<endl;
-        if ( !video.read420( yuvRecFileName1, width, height, frameCount, bitDepth == 8 ? 1 : 2 ) ) { return false; }
+        //std::cout<<"read420:"<<yuvRecFileName1<<endl;
+        if ( !video.read420( yuvRecFileName, width, height, frameCount, bitDepth == 8 ? 1 : 2 ) ) { return false; }
       }
     } else {
       if ( patchColorSubsampling ) {
