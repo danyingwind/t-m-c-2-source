@@ -105,12 +105,13 @@ class PCCVideoDecoder {
       cmd << decoderPath << " --OutputColourSpaceConvert=GBRtoRGB"
           << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName;
     } else {
-      if(type == "texture"){
-        std::cout<<"type == texture2"<<std::endl;
-        cmd << decoderPath << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName1;
-      }else{
-        cmd << decoderPath << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName;
-      }
+      cmd << decoderPath << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName;
+      // if(type == "texture"){
+      //   std::cout<<"type == texture2"<<std::endl;
+      //   cmd << decoderPath << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName1;
+      // }else{
+      //   cmd << decoderPath << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName;
+      // }
       
       // if bitDepth == 8 ensure output bitdepth as 8bit. This is to cater for case if 10bit encoding was used for lossy
       // cases.
