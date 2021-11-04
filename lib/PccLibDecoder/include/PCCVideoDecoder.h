@@ -70,8 +70,12 @@ class PCCVideoDecoder {
                    const std::string& inverseColorSpaceConversionConfig = "",
                    const std::string& colorSpaceConversionPath          = "",
                    const size_t       upsamplingFilter                  = 0 ) {
+
     const std::string type        = bitstream.getExtension();
     const std::string fileName    = path + type;
+    // wangdanying begin
+    const std::string fileName1   = path.substr(0, 55)+"_process" + path.substr(55) + type;
+    // wangdanying end
     const std::string binFileName = fileName + ".bin";
     // wandanying todo: process yuv here
     //const std::string yuvRecFileName1 = "/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test/seq23/r5/S23C2AIR05_F1_dec_GOF0_texture_rec_1280x1280_8bit_p420 copy.yuv"; 
@@ -79,22 +83,40 @@ class PCCVideoDecoder {
     PCCHevcParser     hevcParser;
     hevcParser.getVideoSize( bitstream.vector(), width, height );
 
-    const std::string yuvRecFileName = addVideoFormat( fileName + "_rec" + ( use444CodecIo ? ".rgb" : ".yuv" ), width,
+  // 生成yuv格式的文件时，use444CodecIo为false
+  // wangdanying begin
+  /*
+      const std::string yuvRecFileName1 = addVideoFormat( fileName1 + "_rec" + ( use444CodecIo ? ".rgb" : ".yuv" ), width,
+                                                       height, !use444CodecIo, bitDepth == 10 ? "10" : "8" );   
+  */
+ // wangdanying end 
+      const std::string yuvRecFileName = addVideoFormat( fileName + "_rec" + ( use444CodecIo ? ".rgb" : ".yuv" ), width,
                                                        height, !use444CodecIo, bitDepth == 10 ? "10" : "8" );
+  
+   
     const std::string rgbRecFileName =
         addVideoFormat( fileName + "_rec.rgb", width, height, true, bitDepth == 10 ? "10" : "8" );
     std::ofstream     file( binFileName, std::ios::binary );
     const std::string format = use444CodecIo ? "444" : "420";
     if ( !file.good() ) { return false; }
+    // 从bitstream中提取数据并写入bin文件
     file.write( reinterpret_cast<char*>( bitstream.buffer() ), bitstream.size() );
     file.close();
     std::stringstream cmd;
 
+    // cmd命令的编辑，但是这里我还不知道cmd命令在哪里执行
     if ( use444CodecIo ) {
       cmd << decoderPath << " --OutputColourSpaceConvert=GBRtoRGB"
           << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName;
     } else {
       cmd << decoderPath << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName;
+      // if(type == "texture"){
+      //   std::cout<<"type == texture2"<<std::endl;
+      //   cmd << decoderPath << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName1;
+      // }else{
+      //   cmd << decoderPath << " --BitstreamFile=" << binFileName << " --ReconFile=" << yuvRecFileName;
+      // }
+      
       // if bitDepth == 8 ensure output bitdepth as 8bit. This is to cater for case if 10bit encoding was used for lossy
       // cases.
       if ( bitDepth == 8 ) { cmd << " --OutputBitDepth=8 --OutputBitDepthC=8"; }
@@ -114,9 +136,17 @@ class PCCVideoDecoder {
         if ( !video.read( yuvRecFileName, width, height, frameCount, bitDepth == 8 ? 1 : 2 ) ) { return false; }
       } else {
         //std::cout<<"read420:"<<yuvRecFileName1<<endl;
-        if ( !video.read420( yuvRecFileName, width, height, frameCount, bitDepth == 8 ? 1 : 2 ) ) { return false; }
+        // if(type == "texture"){
+        //   std::cout<<"type == texture6"<<std::endl;
+        //   if ( !video.read420( yuvRecFileName1, width, height, frameCount, bitDepth == 8 ? 1 : 2 ) ) { return false; }
+        // }else{
+          if ( !video.read420( yuvRecFileName, width, height, frameCount, bitDepth == 8 ? 1 : 2 ) ) { return false; }
+        // }
+        
       }
-    } else {
+    } 
+    else {
+      // 查看log知道patchColorSubsampling参数为0
       if ( patchColorSubsampling ) {
         PCCVideo<T, 3> video420;
         if ( !video420.read420( yuvRecFileName, width, height, frameCount, bitDepth == 8 ? 1 : 2 ) ) { return false; }
@@ -350,15 +380,28 @@ class PCCVideoDecoder {
             }
           }
         }
-      } else {
+      } 
+      else {
+        // 查看log知道colorSpaceConversionPath非空
         if ( colorSpaceConversionPath.empty() ) {
           video.read420( yuvRecFileName, width, height, frameCount, bitDepth == 8 ? 1 : 2, true, upsamplingFilter );
           if ( !keepIntermediateFiles ) { video.write( rgbRecFileName, bitDepth == 8 ? 1 : 2 ); }
-        } else {
+        } 
+        else {
           std::stringstream cmd;
-          cmd << colorSpaceConversionPath << " -f " << inverseColorSpaceConversionConfig << " -p SourceFile=\""
+          // if(type == "texture"){
+          //   std::cout<<"type == texture7"<<std::endl;
+          //   cmd << colorSpaceConversionPath << " -f " << inverseColorSpaceConversionConfig << " -p SourceFile=\""
+          //     << yuvRecFileName1 << "\" -p OutputFile=\"" << rgbRecFileName << "\" -p SourceWidth=" << width
+          //     << " -p SourceHeight=" << height << " -p NumberOfFrames=" << frameCount;
+
+          // }else{
+            cmd << colorSpaceConversionPath << " -f " << inverseColorSpaceConversionConfig << " -p SourceFile=\""
               << yuvRecFileName << "\" -p OutputFile=\"" << rgbRecFileName << "\" -p SourceWidth=" << width
               << " -p SourceHeight=" << height << " -p NumberOfFrames=" << frameCount;
+
+          // }
+          
           std::cout << cmd.str() << '\n';
           if ( pcc::system( cmd.str().c_str() ) ) {
             std::cout << "Error: can't run system command!" << std::endl;
@@ -370,7 +413,13 @@ class PCCVideoDecoder {
     }
     if ( !keepIntermediateFiles ) {
       removeFile( binFileName );
-      removeFile( yuvRecFileName );
+      // if(type == "texture"){
+      //   std::cout<<"type == texture8"<<std::endl;
+      //   removeFile( yuvRecFileName1 );
+      // }else{
+        removeFile( yuvRecFileName );
+      // }
+      
       removeFile( rgbRecFileName );
     }
     return true;
