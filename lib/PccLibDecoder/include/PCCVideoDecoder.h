@@ -75,7 +75,7 @@ class PCCVideoDecoder {
     const std::string fileName    = path + type;
     // wangdanying begin
     // const std::string fileName1   = path.substr(0, 55)+"_process" + path.substr(55) + type;
-    const std::string fileName1   = path.substr(0, 46)+"_net" +path.substr(46,9)+ path.substr(55) + type;
+    const std::string fileName1   = path.substr(0, 46)+"_net" +path.substr(46,9)+"_process"+ path.substr(55) + type;
     std::cout << "fileName1 = " << fileName1 << std::endl;
     // 这里将"/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test"改为"/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test_net"
     // wangdanying end
