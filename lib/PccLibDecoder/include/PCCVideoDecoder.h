@@ -74,11 +74,14 @@ class PCCVideoDecoder {
     const std::string type        = bitstream.getExtension();
     const std::string fileName    = path + type;
     // wangdanying begin
-    const std::string fileName1   = path.substr(0, 55)+"_process" + path.substr(55) + type;
+    // const std::string fileName1   = path.substr(0, 55)+"_process" + path.substr(55) + type;
+    const std::string fileName1   = path.substr(0, 46)+"_net" + path.substr(55) + type;
+    // 这里将"/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test"改为"/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test_net"
     // wangdanying end
     const std::string binFileName = fileName + ".bin";
     // wandanying todo: process yuv here
     //const std::string yuvRecFileName1 = "/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test/seq23/r5/S23C2AIR05_F1_dec_GOF0_texture_rec_1280x1280_8bit_p420 copy.yuv"; 
+    // 注意path.substr(0, 55)对应'/home/wangdanying/VPCC_2021/mpeg-pcc-tmc2/test/seq23/r5'
     size_t            width = 0, height = 0;
     PCCHevcParser     hevcParser;
     hevcParser.getVideoSize( bitstream.vector(), width, height );
